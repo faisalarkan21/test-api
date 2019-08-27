@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require("cors");
+var morgan = require('morgan')
 const indexController = require('./routes/index')
 
 const app = express();
@@ -12,6 +13,7 @@ var corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(morgan('dev'))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: false
