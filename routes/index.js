@@ -26,6 +26,24 @@ router.get("/users", async (req, res) => {
   });
 });
 
+router.get("/user", async (req, res) => {
+  console.log(req.query.id);
+  if (req.query.id == null) {
+    return res.sendStatus(403);
+  }
+  connection.query("SELECT * from users where id = ?", [req.query.id], function(
+    error,
+    results,
+    fields
+  ) {
+    if (error) throw error;
+    // console.log('The solution is: ', results[0].solution);
+    res.json({
+      data: results
+    });
+  });
+});
+
 router.post("/add-user", async (req, res) => {
   const data = {
     name: req.body.name,
@@ -76,17 +94,17 @@ router.post("/delete-user", async (req, res) => {
     return res.sendStatus(403);
   }
 
-  connection.query(
-    "DELETE FROM users WHERE id = ?",
-    [req.body.id],
-    function(error, results, fields) {
-      if (error) throw error;
+  connection.query("DELETE FROM users WHERE id = ?", [req.body.id], function(
+    error,
+    results,
+    fields
+  ) {
+    if (error) throw error;
 
-      res.json({
-        data: "success"
-      });
-    }
-  );
+    res.json({
+      data: "success"
+    });
+  });
 });
 
 function generate(user) {
