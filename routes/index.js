@@ -31,7 +31,7 @@ router.get("/user", async (req, res) => {
   if (req.query.id == null) {
     return res.sendStatus(403);
   }
-  connection.query("SELECT * FROM users INNER JOIN detail_user ON users.id = detail_user.id", [req.query.id], function(
+  connection.query("SELECT * FROM users INNER JOIN detail_user ON users.id = detail_user.id where users.id = ?", [req.query.id], function(
     error,
     results,
     fields
