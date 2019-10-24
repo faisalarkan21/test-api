@@ -2,6 +2,7 @@ const express = require("express");
 var mysql = require("mysql");
 const UUID = require("uuid");
 const JWT = require("jsonwebtoken");
+const paginate = require('express-paginate');
 // var CryptoJS = require("crypto-js");
 var SHA256 = require("crypto-js/sha512");
 
@@ -17,11 +18,37 @@ connection.connect();
 const router = express.Router();
 
 router.get("/users", async (req, res) => {
+
+  console.log(req.query)
+
+  var numRows;
+  var queryPagination;
+  var numPerPage = parseInt(req.query.npp, 10) || 1;
+  var page = parseInt(req.query.page - 1, 10) || 0;
+  var numPages;
+  var skip = page * numPerPage;
+  // Here we compute the LIMIT parameter for MySQL query
+
+
+  var limit = skip + ',' + numPerPage;
+  console.log('limit', limit)
+
+  connection.query(`SELECT * from users LIMIT ${limit}`  , function(error, results, fields) {
+    if (error) throw error;
+    // console.log('The solution is: ', results[0].solution);
+  
+    res.json({
+      data: results
+    });
+  });
+});
+
+router.get("/count-users", async (req, res) => {
   connection.query("SELECT * from users", function(error, results, fields) {
     if (error) throw error;
     // console.log('The solution is: ', results[0].solution);
     res.json({
-      data: results
+      data: results.length
     });
   });
 });
@@ -31,17 +58,17 @@ router.get("/user", async (req, res) => {
   if (req.query.id == null) {
     return res.sendStatus(403);
   }
-  connection.query("SELECT * FROM users INNER JOIN detail_user ON users.id = detail_user.id where users.id = ?", [req.query.id], function(
-    error,
-    results,
-    fields
-  ) {
-    if (error) throw error;
-    // console.log('The solution is: ', results[0].solution);
-    res.json({
-      data: results
-    });
-  });
+  connection.query(
+    "SELECT * FROM users INNER JOIN detail_user ON users.id = detail_user.id where users.id = ?",
+    [req.query.id],
+    function(error, results, fields) {
+      if (error) throw error;
+      // console.log('The solution is: ', results[0].solution);
+      res.json({
+        data: results
+      });
+    }
+  );
 });
 
 router.post("/add-user", async (req, res) => {
@@ -85,6 +112,77 @@ router.post("/update-user", async (req, res) => {
       res.json({
         data: "success"
       });
+    }
+  );
+});
+
+router.post("/update-detail", async (req, res) => {
+  const {
+    avatar,
+    city,
+    country,
+    email,
+    first_name,
+    gender,
+    job_title,
+    last_name,
+    name,
+    password,
+    phone,
+    postal_code,
+    street_address,
+    id,
+  } = req.body;
+
+  const data = {
+    avatar,
+    city,
+    country,
+    email,
+    first_name,
+    gender,
+    job_title,
+    last_name,
+    name,
+    password,
+    phone,
+    postal_code,
+    street_address
+  };
+
+  console.log(req.body);
+
+  if (req.body.id == null) {
+    return res.sendStatus(403);
+  }
+
+  connection.query(
+    "UPDATE users SET name = ?, email = ? WHERE id = ?",
+    [req.body.name, req.body.email, req.body.id],
+    function(error, results, fields) {
+      if (error) throw error;
+      connection.query(
+        "UPDATE detail_user SET avatar = ?,  city = ?,  country = ?,  first_name = ?,  gender = ?,  job_title = ?,  last_name = ?,  phone = ?,  postal_code = ?,  street_address = ? WHERE id = ?",
+        [
+          avatar,
+          city,
+          country,
+          first_name,
+          gender,
+          job_title,
+          last_name,
+          phone,
+          postal_code,
+          street_address,
+          id
+        ],
+        function(error, results, fields) {
+          if (error) throw error;
+          res.json({
+            data: "success"
+          });
+        }
+      );
     }
   );
 });
