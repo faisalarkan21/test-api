@@ -72,13 +72,6 @@ router.get("/user", async (req, res) => {
   });
 });
 
-router.get("/zahra", async (req, res) => {
-    res.json({
-      data: 'I Love You!'
-    });
-  });
-})
-
 router.post("/add-user", async (req, res) => {
   const data = {
     name: req.body.name,
