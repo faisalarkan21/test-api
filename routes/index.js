@@ -2,20 +2,31 @@ const express = require("express");
 var mysql = require("mysql");
 const UUID = require("uuid");
 const JWT = require("jsonwebtoken");
-const paginate = require('express-paginate');
 // var CryptoJS = require("crypto-js");
 var SHA256 = require("crypto-js/sha512");
 
 var connection = mysql.createConnection({
   host: "localhost",
-  user: "root",
-  password: "arkan14811",
+  user: "faisal",
+  password: "testing123",
   database: "hacktiv8_test1"
 });
 
 connection.connect();
 
 const router = express.Router();
+
+
+
+router.get("/count-users", async (req, res) => {
+  connection.query("SELECT * from users", function(error, results, fields) {
+    if (error) throw error;
+    // console.log('The solution is: ', results[0].solution);
+    res.json({
+      data: results.length
+    });
+  });
+});
 
 router.get("/users", async (req, res) => {
 
@@ -38,19 +49,9 @@ router.get("/users", async (req, res) => {
     // console.log('The solution is: ', results[0].solution);
   
     res.json({
-      data: results
+      users: results
     });
-  });
-});
-
-router.get("/count-users", async (req, res) => {
-  connection.query("SELECT * from users", function(error, results, fields) {
-    if (error) throw error;
-    // console.log('The solution is: ', results[0].solution);
-    res.json({
-      data: results.length
-    });
-  });
+  
 });
 
 router.get("/user", async (req, res) => {
@@ -58,18 +59,25 @@ router.get("/user", async (req, res) => {
   if (req.query.id == null) {
     return res.sendStatus(403);
   }
-  connection.query(
-    "SELECT * FROM users INNER JOIN detail_user ON users.id = detail_user.id where users.id = ?",
-    [req.query.id],
-    function(error, results, fields) {
-      if (error) throw error;
-      // console.log('The solution is: ', results[0].solution);
-      res.json({
-        data: results
-      });
-    }
-  );
+  connection.query("SELECT * FROM users INNER JOIN detail_user ON users.id = detail_user.id where users.id = ?", [req.query.id], function(
+    error,
+    results,
+    fields
+  ) {
+    if (error) throw error;
+    // console.log('The solution is: ', results[0].solution);
+    res.json({
+      data: results[0]
+    });
+  });
 });
+
+router.get("/zahra", async (req, res) => {
+    res.json({
+      data: 'I Love You!'
+    });
+  });
+})
 
 router.post("/add-user", async (req, res) => {
   const data = {
@@ -115,6 +123,7 @@ router.post("/update-user", async (req, res) => {
     }
   );
 });
+
 
 router.post("/update-detail", async (req, res) => {
   const {
@@ -186,6 +195,7 @@ router.post("/update-detail", async (req, res) => {
     }
   );
 });
+
 
 router.post("/delete-user", async (req, res) => {
   if (req.body.id == null) {
